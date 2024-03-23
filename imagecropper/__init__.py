@@ -35,7 +35,8 @@ def main():
                               "height": 400,
                               "frame_color": "#FF0000",
                               "frame_width": 4,
-                              "screen_modifier": 0.85
+                              "screen_modifier": 0.85,
+                              "crop_scale": 2
                           })
 
     description = app_help_text
