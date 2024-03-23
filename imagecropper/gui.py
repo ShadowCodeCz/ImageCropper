@@ -98,7 +98,7 @@ class ControlPanel(QFrame):
         self.width_spin.setMinimum(0)
         self.width_spin.setMaximum(2500)
         self.width_spin.setMinimumWidth(250)
-        self.width_spin.setValue(self.model.crop_rect_width())
+        self.width_spin.setValue(self.model.width)
         self.width_spin.valueChanged.connect(self.model.new_width)
 
         self.height_label = QLabel("height")
@@ -107,7 +107,7 @@ class ControlPanel(QFrame):
         self.height_spin.setMinimum(0)
         self.height_spin.setMaximum(2500)
         self.height_spin.setMinimumWidth(250)
-        self.height_spin.setValue(self.model.crop_rect_height())
+        self.height_spin.setValue(self.model.height)
         self.height_spin.valueChanged.connect(self.model.new_height)
 
         self.scale_coefficient_label = QLabel("scale coefficient")
