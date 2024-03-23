@@ -38,6 +38,7 @@ class Application:
 
         self.model.screen_width = size.width()
         self.model.screen_height = size.height()
+        print(f"{self.model.screen_width}x{self.model.screen_height}")
 
         qdarktheme.setup_theme(corner_shape="sharp")
         self.window = gui.MainWindow()

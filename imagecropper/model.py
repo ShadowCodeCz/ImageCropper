@@ -91,7 +91,9 @@ class DataModel(QObject):
         self.original_pixmap = self.load_pixmap()
 
         scale_width = self.usable_screen_width() / self.original_pixmap.width()
+        print(f"scale_width = {self.usable_screen_width()} / {self.original_pixmap.width()}")
         scale_height = self.usable_screen_height() / self.original_pixmap.height()
+        print(f"scale_height = {self.usable_screen_height()} / {self.original_pixmap.height()}")
         self.image_scale = min(scale_width, scale_height)
 
         if self.image_scale < 1:
@@ -109,7 +111,7 @@ class DataModel(QObject):
         return int(self.screen_width * self.screen_modifier)
 
     def usable_screen_height(self):
-        return int(self.screen_width * self.screen_modifier)
+        return int(self.screen_height * self.screen_modifier)
 
     def image_path(self):
         return self.path
