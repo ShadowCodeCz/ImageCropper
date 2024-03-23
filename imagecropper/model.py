@@ -20,8 +20,9 @@ class DataModel(QObject):
         super().__init__()
         self.width = core.container.cfg.width()
         self.height = core.container.cfg.height()
-        self.scale = 1
+        self.scale = float(core.container.cfg.crop_scale())
         self.path = "./homer.png"
+        self.path = "./test.JPG"
         self.frame_width = int(core.container.cfg.frame_width())
         self.frame_color = core.container.cfg.frame_color()
 
@@ -58,7 +59,7 @@ class DataModel(QObject):
             if exif and orientation_key in exif:
                 orientation = exif[orientation_key]
 
-                if orientation == 3:  # Obráceně
+                if orientation == 3:
                     image = image.rotate(180, expand=True)
                 elif orientation == 6:
                     image = image.rotate(270, expand=True)
@@ -72,15 +73,13 @@ class DataModel(QObject):
         return self.convert_pil_to_pixmap(image)
 
     def convert_pil_to_pixmap(self, pil_image):
-        # Převod PIL Image na QByteArray
         byte_array = io.BytesIO()
-        pil_image.save(byte_array, format=pil_image.format)
+        img_format = pil_image.format if pil_image.format else 'PNG'
+        pil_image.save(byte_array, format=img_format)
 
-        # Vytvoření QImage z QByteArray
         qimage = QImage()
         qimage.loadFromData(byte_array.getvalue())
 
-        # Převod QImage na QPixmap
         pixmap = QPixmap.fromImage(qimage)
 
         return pixmap

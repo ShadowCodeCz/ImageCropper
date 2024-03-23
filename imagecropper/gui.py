@@ -125,7 +125,7 @@ class ControlPanel(QFrame):
         self.scale_coefficient_spin.setMaximum(100.00)
         self.scale_coefficient_spin.setDecimals(2)
         self.scale_coefficient_spin.setSingleStep(0.1)
-        self.scale_coefficient_spin.setValue(1)
+        self.scale_coefficient_spin.setValue(self.model.crop_scale())
         self.scale_coefficient_spin.valueChanged.connect(self.model.new_scale)
         self.scale_coefficient_spin.setMinimumWidth(250)
 
