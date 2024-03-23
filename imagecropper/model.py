@@ -2,17 +2,15 @@ import os
 import datetime
 
 from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtCore import QMetaType
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+
+from PIL import ImageQt, Image
 
 from . import core
 
-# def register_qt_type(cls):
-#     """Dekorátor pro registraci tříd Pythonu pro použití v PyQt signálech."""
-#     QMetaType.registerType(cls)
-#     return cls
-#
-# @register_qt_type
-
+import io
 
 class DataModel(QObject):
     crop_rect_changed = pyqtSignal()
@@ -27,13 +25,92 @@ class DataModel(QObject):
         self.frame_width = int(core.container.cfg.frame_width())
         self.frame_color = core.container.cfg.frame_color()
 
+        self.screen_width = 800
+        self.screen_height = 600
+
+        self.screen_modifier = float(core.container.cfg.screen_modifier())
+
+        self.image_scale = 1
+        self.original_pixmap = None
+        self.a = None
 
     def crop_frame_color(self):
         return self.frame_color
 
+    def load_pixmap(self):
+        try:
+            if self.image_path() is None:
+                return QPixmap(800, 500)
+            else:
+                return self.load_and_correct_image(self.image_path())
+                # return QPixmap(self.image_path())
+        except Exception as e:
+            # self.logger.error(f"Error during opening image {self.model.image_path()}")
+            print(e)
+            return QPixmap(800, 500)
+
+    def load_and_correct_image(self, image_path):
+        image = Image.open(image_path)
+
+        try:
+            exif = image._getexif()
+            orientation_key = 274
+            if exif and orientation_key in exif:
+                orientation = exif[orientation_key]
+
+                if orientation == 3:  # Obráceně
+                    image = image.rotate(180, expand=True)
+                elif orientation == 6:
+                    image = image.rotate(270, expand=True)
+                elif orientation == 8:
+                    image = image.rotate(90, expand=True)
+        except (AttributeError, KeyError, IndexError):
+            QPixmap(800, 500)
+            # print("error")
+
+        # qt_image = ImageQt.toqpixmap(image)
+        return self.convert_pil_to_pixmap(image)
+
+    def convert_pil_to_pixmap(self, pil_image):
+        # Převod PIL Image na QByteArray
+        byte_array = io.BytesIO()
+        pil_image.save(byte_array, format=pil_image.format)
+
+        # Vytvoření QImage z QByteArray
+        qimage = QImage()
+        qimage.loadFromData(byte_array.getvalue())
+
+        # Převod QImage na QPixmap
+        pixmap = QPixmap.fromImage(qimage)
+
+        return pixmap
 
     def crop_frame_width(self):
         return self.frame_width
+
+    def screen_scaled_pixmap(self):
+        self.original_pixmap = self.load_pixmap()
+
+        scale_width = self.usable_screen_width() / self.original_pixmap.width()
+        scale_height = self.usable_screen_height() / self.original_pixmap.height()
+        self.image_scale = min(scale_width, scale_height)
+
+        if self.image_scale < 1:
+            return self.original_pixmap.scaled(
+                self.usable_screen_width(),
+                self.usable_screen_height(),
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+        else:
+            self.image_scale = 1
+            return self.original_pixmap
+
+    def usable_screen_width(self):
+        return int(self.screen_width * self.screen_modifier)
+
+    def usable_screen_height(self):
+        return int(self.screen_width * self.screen_modifier)
 
     def image_path(self):
         return self.path
@@ -42,10 +119,10 @@ class DataModel(QObject):
         return self.modify_filename(self.image_path(), rect)
 
     def crop_rect_width(self):
-        return int(self.scale * self.width)
+        return int(self.scale * self.width * self.image_scale)
 
     def crop_rect_height(self):
-        return int(self.scale * self.height)
+        return int(self.scale * self.height * self.image_scale)
 
     def crop_scale(self):
         return self.scale
@@ -79,3 +156,22 @@ class DataModel(QObject):
         os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
 
         return new_file_path
+
+    def save_pixmap(self, pixmap, crop_rect):
+        # resized_pixmap = pixmap.scaled(self.model.width, self.model.height, Qt.AspectRatioMode.KeepAspectRatio)
+        # resized_pixmap.save(self.model.new_cropped_file_path(QRect(self.crop_rect.x(), self.crop_rect.y(), self.model.width, self.model.height)), "PNG")
+
+        cropped_x = crop_rect.x()
+        cropped_y = crop_rect.y()
+        cropped_width = crop_rect.width()
+        cropped_height = crop_rect.height()
+
+        original_x = cropped_x / self.image_scale
+        original_y = cropped_y / self.image_scale
+        original_width = cropped_width / self.image_scale
+        original_height = cropped_height / self.image_scale
+
+        original_crop_rect = QRect(int(original_x), int(original_y), int(original_width), int(original_height))
+
+        resized_pixmap = pixmap.scaled(self.width, self.height, Qt.AspectRatioMode.KeepAspectRatio)
+        resized_pixmap.save(self.new_cropped_file_path(QRect(int(original_crop_rect.x()), int(original_crop_rect.y()), self.width, self.height)), "PNG")

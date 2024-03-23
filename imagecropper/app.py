@@ -27,12 +27,21 @@ class Application:
         self.logger = logger
         self.window = None
         self.arguments = None
+        self.model = core.container.model()
+        self.a = None
 
     def run(self):
         self.app = QApplication([])
+
+        screen = self.app.primaryScreen()
+        size = screen.size()
+
+        self.model.screen_width = size.width()
+        self.model.screen_height = size.height()
+
         qdarktheme.setup_theme(corner_shape="sharp")
         self.window = gui.MainWindow()
-        self.window.setWindowTitle(f"Template Gui App")
+        self.window.setWindowTitle(f"Image cropper")
         self.set_logo()
 
         self.window.show()

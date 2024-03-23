@@ -33,7 +33,7 @@ setup(
     long_description_content_type='text/markdown',
     classifiers=classifiers,
     keywords=name,
-    install_requires=["yapsy", "PyQt6", "dependency-injector"],
+    install_requires=["yapsy", "PyQt6", "dependency-injector", "Pillow"],
     entry_points={
         'console_scripts': [
             'image-cropper=imagecropper:main',

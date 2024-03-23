@@ -164,15 +164,17 @@ class ImageCropper(QLabel):
         self.setMouseTracking(True)
 
     def load_pixmap(self):
-        try:
-            if self.model.image_path() is None:
-                self.setPixmap(QPixmap(800, 500))
-            else:
-                print(self.model.image_path())
-                self.setPixmap(QPixmap(self.model.image_path()))
-        except Exception as e:
-            self.logger.error(f"Error during opening image {self.model.image_path()}")
-            return QPixmap(800, 500)
+        # try:
+        #     if self.model.image_path() is None:
+        #         self.setPixmap(QPixmap(800, 500))
+        #     else:
+        #         print(self.model.image_path())
+        #         self.setPixmap(QPixmap(self.model.image_path()))
+        # except Exception as e:
+        #     self.logger.error(f"Error during opening image {self.model.image_path()}")
+        #     self.setPixmap(QPixmap(800, 500))
+        self.setPixmap(self.model.screen_scaled_pixmap())
+        self.new_crop_rect()
 
     def mouseMoveEvent(self, event):
         self.crop_rect.moveCenter(event.pos())
@@ -204,9 +206,9 @@ class ImageCropper(QLabel):
         painter.drawRect(rect)
 
     def save_pixmap(self, pixmap):
-        resized_pixmap = pixmap.scaled(self.model.width, self.model.height, Qt.AspectRatioMode.KeepAspectRatio)
-
-        resized_pixmap.save(self.model.new_cropped_file_path(QRect(self.crop_rect.x(), self.crop_rect.y(), self.model.width, self.model.height)), "PNG")
+        # resized_pixmap = pixmap.scaled(self.model.width, self.model.height, Qt.AspectRatioMode.KeepAspectRatio)
+        # resized_pixmap.save(self.model.new_cropped_file_path(QRect(self.crop_rect.x(), self.crop_rect.y(), self.model.width, self.model.height)), "PNG")
+        self.model.save_pixmap(pixmap, self.crop_rect)
 
     def new_crop_rect(self):
         new_width = self.model.crop_rect_width()
