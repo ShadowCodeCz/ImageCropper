@@ -174,5 +174,13 @@ class DataModel(QObject):
 
         original_crop_rect = QRect(int(original_x), int(original_y), int(original_width), int(original_height))
 
-        resized_pixmap = pixmap.scaled(self.width, self.height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        resized_pixmap.save(self.new_cropped_file_path(QRect(int(original_crop_rect.x()), int(original_crop_rect.y()), self.width, self.height)), "PNG")
+        # Qt.AspectRatioMode.IgnoreAspectRatio
+        # resized_pixmap = self.original_pixmap.scaled(self.width, self.height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        # resized_pixmap.save(self.new_cropped_file_path(QRect(int(original_crop_rect.x()), int(original_crop_rect.y()), self.width, self.height)), "PNG")
+
+        crop_pixmap = self.original_pixmap.copy(int(original_x), int(original_y), int(original_width), int(original_height))
+        scaled_pixmap = crop_pixmap.scaled(self.width, self.height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+
+        tmp_crop_rect = QRect(int(original_crop_rect.x()), int(original_crop_rect.y()), self.width, self.height)
+        path = self.new_cropped_file_path(tmp_crop_rect)
+        scaled_pixmap.save(path, "PNG")
